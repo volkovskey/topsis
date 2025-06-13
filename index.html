@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Демо порівняння товарів</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Порівняння товарів</h1>
+    <div class="category-select">
+      <label for="category-select">Оберіть категорію:</label>
+      <select id="category-select">
+        <option value="scooters">Самокати</option>
+        <option value="phones">Телефони</option>
+      </select>
+    </div>
+    <div id="product-list" class="product-list"></div>
+    <button id="compare-button">Порівняти</button>
+    <div id="comparison-table" class="comparison-table"></div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
