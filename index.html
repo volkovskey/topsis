@@ -10,6 +10,7 @@
 <body>
   <div class="container">
     <h1>Порівняння товарів</h1>
+    <p>Кваліфікаційна робота студента 124-21-1 Волкова А.О. на тему "Розробка та впровадження системи рекомендацій у функції порівняння товарів на сайтах інтернет-магазинів"</p>
     <div class="category-select">
       <label for="category-select">Оберіть категорію:</label>
       <select id="category-select">
@@ -18,9 +19,18 @@
       </select>
     </div>
     <div id="product-list" class="product-list"></div>
+    <div id="recommendations" class="recommendations">
+      <h3>Рекомендовані товари</h3>
+      <div id="recommendation-list"></div>
+    </div>
+    <div class="toggle-container">
+      <input type="checkbox" id="hide-same">
+      <label for="hide-same">Приховати однакові параметри</label>
+    </div>
     <button id="compare-button">Порівняти</button>
     <div id="comparison-table" class="comparison-table"></div>
   </div>
-  <script src="script.js"></script>
+  <script src="js/products.js"></script>
+  <script src="js/logic.js"></script>
 </body>
 </html>
