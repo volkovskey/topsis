@@ -142,7 +142,6 @@ function generateComparisonTable(selectedProducts, category, recommendedId = nul
     tbody.appendChild(row);
   });
 
-  // Додавання рядка з кнопками "Купити"
   const buyRow = document.createElement("tr");
   buyRow.appendChild(document.createElement("td"));
   selectedProducts.forEach(product => {
@@ -196,7 +195,6 @@ function recommendUser(category) {
     priority: totalCharacteristics - index
   }));
 
-  // Додаємо невибрані характеристики з вагою 1
   const priorities = characteristics[category]
     .filter(char => char.recommendable)
     .map(char => {
@@ -264,12 +262,7 @@ function displayWeightsInfo(category, userWeights, avgWeights) {
 function displayTopsisResults(products, weights, category, recommended) {
   const resultsContainer = document.getElementById("topsis-results");
 
-  // Масив для зберігання рядків таблиці
-  let tableRows = [
-    `<tr><th>Характеристика</th>${products.map(p => `<th>${p.brand} ${p.model}</th>`).join('')}</tr>`
-  ];
-
-  // Нормалізація значень
+  // Нормалізація
   const normalized = products.map(product => {
     const normalizedProduct = {};
     characteristics[category].forEach(char => {
@@ -291,24 +284,33 @@ function displayTopsisResults(products, weights, category, recommended) {
     return normalizedProduct;
   });
 
-  // Визначення ідеального та антиідеального значень
+  // Вагова матриця (зважені нормалізовані значення)
+  const weightedNormalized = normalized.map(product => {
+    const weightedProduct = {};
+    weights.forEach(weight => {
+      weightedProduct[weight.key] = product[weight.key] * weight.priority;
+    });
+    return weightedProduct;
+  });
+
+  // Ідеальна та антиідеальна альтернативи
   const ideal = {};
   const antiIdeal = {};
   weights.forEach(weight => {
-    const values = normalized.map(p => p[weight.key]);
+    const values = weightedNormalized.map(p => p[weight.key]);
     ideal[weight.key] = Math.max(...values);
     antiIdeal[weight.key] = Math.min(...values);
   });
 
-  // Обчислення відстаней
-  const distances = normalized.map(product => {
+  // Відстані до ідеалу та антиідеалу
+  const distances = weightedNormalized.map(product => {
     let distanceToIdeal = 0;
     let distanceToAntiIdeal = 0;
     weights.forEach(weight => {
       const diffIdeal = product[weight.key] - ideal[weight.key];
       const diffAntiIdeal = product[weight.key] - antiIdeal[weight.key];
-      distanceToIdeal += Math.pow(diffIdeal, 2) * weight.priority;
-      distanceToAntiIdeal += Math.pow(diffAntiIdeal, 2) * weight.priority;
+      distanceToIdeal += Math.pow(diffIdeal, 2);
+      distanceToAntiIdeal += Math.pow(diffAntiIdeal, 2);
     });
     return {
       ideal: Math.sqrt(distanceToIdeal),
@@ -316,36 +318,54 @@ function displayTopsisResults(products, weights, category, recommended) {
     };
   });
 
-  // Обчислення оцінок
+  // Оцінки
   const scores = distances.map(d => d.antiIdeal / (d.ideal + d.antiIdeal));
 
-  // Додавання рядків для характеристик
+  // Формування таблиці
+  let tableRows = [
+    `<tr><th>Характеристика</th>${products.map(p => `<th>${p.brand} ${p.model}</th>`).join('')}</tr>`
+  ];
+
+  // Нормалізовані значення
   characteristics[category].filter(char => char.recommendable).forEach(char => {
     tableRows.push(`
       <tr>
-        <td>${char.label}</td>
+        <td>${char.label} (норм.)</td>
         ${normalized.map(n => `<td>${n[char.key].toFixed(3)}</td>`).join('')}
       </tr>
     `);
   });
 
-  // Додавання рядків для відстаней і оцінок
+  // Зважені нормалізовані значення
+  characteristics[category].filter(char => char.recommendable).forEach(char => {
+    tableRows.push(`
+      <tr>
+        <td>${char.label} (зваж.)</td>
+        ${weightedNormalized.map(n => `<td>${n[char.key].toFixed(3)}</td>`).join('')}
+      </tr>
+    `);
+  });
+
+  // // Ідеальні та антиідеальні значення
+  // tableRows.push(`
+  //   <tr><td>Ідеал</td>${weights.map(w => `<td>${ideal[w.key].toFixed(3)}</td>`).join('')}</tr>
+  //   <tr><td>Антиідеал</td>${weights.map(w => `<td>${antiIdeal[w.key].toFixed(3)}</td>`).join('')}</tr>
+  // `);
+
+  // Відстані та оцінки
   tableRows.push(`
     <tr><td>Відстань до ідеалу</td>${distances.map(d => `<td>${d.ideal.toFixed(3)}</td>`).join('')}</tr>
     <tr><td>Відстань до антиідеалу</td>${distances.map(d => `<td>${d.antiIdeal.toFixed(3)}</td>`).join('')}</tr>
     <tr><td>Оцінка</td>${scores.map(s => `<td>${s.toFixed(3)}</td>`).join('')}</tr>
   `);
 
-  // Формування повного HTML
   const tableHTML = `
     <h3>Результати розрахунків TOPSIS</h3>
-    <h4>Нормалізовані значення та оцінки</h4>
     <table>
       ${tableRows.join('')}
     </table>
   `;
 
-  // Вставка HTML одним блоком
   resultsContainer.innerHTML = tableHTML;
 }
 

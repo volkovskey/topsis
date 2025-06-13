@@ -1,5 +1,5 @@
 function topsis(products, weights, characteristics) {
-  // Нормалізація даних
+  // 1. Нормалізація даних
   const normalized = products.map(product => {
     const normalizedProduct = {};
     characteristics.forEach(char => {
@@ -21,31 +21,45 @@ function topsis(products, weights, characteristics) {
     return normalizedProduct;
   });
 
-  // Визначення ідеального та антиідеального розв'язку
+  // 2. Обчислюємо вагову матрицю (зважені нормалізовані значення)
+  const weightedNormalized = normalized.map(product => {
+    const weightedProduct = {};
+    weights.forEach(weight => {
+      weightedProduct[weight.key] = product[weight.key] * weight.priority;
+    });
+    return weightedProduct;
+  });
+
+  // 3. Шукаємо найгіршу та найкращу альтернативу (ідеальну та антиідеальну)
   const ideal = {};
   const antiIdeal = {};
   weights.forEach(weight => {
-    const values = normalized.map(p => p[weight.key]);
+    const values = weightedNormalized.map(p => p[weight.key]);
     ideal[weight.key] = Math.max(...values);
     antiIdeal[weight.key] = Math.min(...values);
   });
 
-  // Обчислення відстаней до ідеального та антиідеального розв'язку
-  const scores = normalized.map(product => {
+  // 4. Розраховуємо відстані до найкращої альтернативи (ідеалу)
+  // 5. Розраховуємо відстані до найгіршої альтернативи (антиідеалу)
+  const distances = weightedNormalized.map(product => {
     let distanceToIdeal = 0;
     let distanceToAntiIdeal = 0;
     weights.forEach(weight => {
       const diffIdeal = product[weight.key] - ideal[weight.key];
       const diffAntiIdeal = product[weight.key] - antiIdeal[weight.key];
-      distanceToIdeal += Math.pow(diffIdeal, 2) * weight.priority;
-      distanceToAntiIdeal += Math.pow(diffAntiIdeal, 2) * weight.priority;
+      distanceToIdeal += Math.pow(diffIdeal, 2);
+      distanceToAntiIdeal += Math.pow(diffAntiIdeal, 2);
     });
-    distanceToIdeal = Math.sqrt(distanceToIdeal);
-    distanceToAntiIdeal = Math.sqrt(distanceToAntiIdeal);
-    return distanceToAntiIdeal / (distanceToIdeal + distanceToAntiIdeal);
+    return {
+      ideal: Math.sqrt(distanceToIdeal),
+      antiIdeal: Math.sqrt(distanceToAntiIdeal)
+    };
   });
 
-  // Визначення найкращого продукту
-  const bestIndex = scores.indexOf(Math.max(...scores));
+  // 6. Обчислюємо подібність до найкращого продукту
+  const scores = distances.map(d => d.ideal / (d.ideal + d.antiIdeal));
+
+  // 7. Ранжуємо та отримуємо найкращий продукт
+  const bestIndex = scores.indexOf(Math.min(...scores));
   return products[bestIndex];
 }
