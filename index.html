@@ -19,18 +19,25 @@
       </select>
     </div>
     <div id="product-list" class="product-list"></div>
-    <div id="recommendations" class="recommendations">
-      <h3>Рекомендовані товари</h3>
-      <div id="recommendation-list"></div>
+    <div id="priority-select" class="hidden">
+      <h3>Встановіть пріоритети для характеристик (перетягуйте для сортування)</h3>
+      <div id="priority-checkboxes"></div>
+      <ul id="priority-list" class="sortable"></ul>
     </div>
     <div class="toggle-container">
       <input type="checkbox" id="hide-same">
       <label for="hide-same">Приховати однакові параметри</label>
     </div>
     <button id="compare-button">Порівняти</button>
+    <button id="clear-storage">Очистити збережені дані</button>
     <div id="comparison-table" class="comparison-table"></div>
+    <div id="topsis-results" class="topsis-results"></div>
+    <div id="weights-info" class="weights-info"></div>
   </div>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
   <script src="js/products.js"></script>
+  <script src="js/topsis.js"></script>
   <script src="js/logic.js"></script>
 </body>
 </html>
